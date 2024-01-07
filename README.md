@@ -7,23 +7,23 @@ A terraform solution/plan to deploy/destory an ontap simulator to vmware
 ### Terraform
 
 We start with a terraform plan (`/terraform` folder).  
-It basically takes a bunch of variables and deploy an ontap vsim ova file to vcenter.  
+It basically takes a bunch of variables and deploys an ontap vsim ova file to vcenter.  
 So obviously we need some vcenter information, path to the ova file, vm_name, some network names.  
 
 Terraform needs to be installed (duh...)  
 The terraform folder needs r/w access (`chmod -R 644 /terraform`).  
 The terraform folder needs to be initiated (`terraform init`), to install the providers.  
-The terraform providers (vsphere) needs to have execution rights (`chmod +x`), after the init, the provider folder will be created.
+The terraform provider folder (vsphere) needs to have execution rights (`chmod +x`), after the init, the provider folder will be created.
 
   
 In the folder terraform/ova/netapp we assume you place the vsim ova file, which is not included in this repository
 
 ### Ansible
 
-The solution contains out of several steps.  
+The solution has several steps.  
 We try to make this as clean as possible, so we use roles.  
 Each role has a main-task where we pass the task we want to run, this makes the playbook very readable.  
-Each role has a facts-task where we assemble the variable, that can come from several places and that we merge and flatten.  
+Each role has a facts-task where we assemble the variables, that can come from several places and that we merge and flatten.  
 Each role has 1 or more action-tasks (create, destroy, ...) depending on the role, which will execute that actual task.  
   
 A playbook will generally have a bunch of steps
@@ -68,7 +68,7 @@ Additionally the init-task will send the necessary key-strokes to the vm (after 
 
 #### Role 'cluster'
 
-This will create the cluster and apply some day0 tasks (dns, licenses, timezone, broadcast domains, vlan, ...).  
+This will create the cluster and apply some day0 tasks (dns, licenses, timezone, broadcast domains, vlan, aggr, lifs, ...).  
 
 #### Role 'aiqum'
 
