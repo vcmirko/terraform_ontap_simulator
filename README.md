@@ -72,5 +72,5 @@ This will create the cluster and apply some day0 tasks (dns, licenses, timezone,
 
 #### Role 'aiqum'
 
-As an extra, the aiqum role allow to (un)register and rediscover the cluster in Netapps 'AIQUM' server (Active IQ Unified Manager).
+As an extra, the aiqum role allows to (un)register and rediscover the cluster in Netapps 'AIQUM' server (Active IQ Unified Manager).
 
