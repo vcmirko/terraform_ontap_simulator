@@ -9,10 +9,12 @@ A terraform solution/plan to deploy/destory an ontap simulator to vmware
 We start with a terraform plan (`/terraform` folder).  
 It basically takes a bunch of variables and deploy an ontap vsim ova file to vcenter.  
 So obviously we need some vcenter information, path to the ova file, vm_name, some network names.  
-  
+
+Terraform needs to be installed (duh...)  
 The terraform folder needs r/w access (`chmod -R 644 /terraform`).  
-The terraform folder needs to be initiator (`terraform init`), to install the providers.  
-Terraform needs to be install (duh...)
+The terraform folder needs to be initiated (`terraform init`), to install the providers.  
+The terraform providers (vsphere) needs to have execution rights (`chmod +x`), after the init, the provider folder will be created.
+
   
 In the folder terraform/ova/netapp we assume you place the vsim ova file, which is not included in this repository
 
