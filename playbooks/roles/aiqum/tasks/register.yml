@@ -1,0 +1,26 @@
+---
+
+- set_fact:
+    auth: &auth
+      user: "{{ aiq_username }}"
+      password: "{{ aiq_password }}"
+      force_basic_auth: yes
+      validate_certs: no
+      return_content: yes
+      body_format: json      
+
+- name: Register CLUSTER in Aiqum
+#  no_log: true
+  uri:
+    url: "https://{{ aiq_hostname }}/api/admin/datasources/clusters"
+    body:
+      address: "{{ cluster.mgmt_ip }}"
+      username: "{{ netapp_username }}"
+      password: "{{ netapp_password}}"
+      port: 443
+      protocol: https
+    method: POST
+    status_code: 200,201
+    <<: *auth
+  delegate_to: localhost
+  # ignore_errors: yes

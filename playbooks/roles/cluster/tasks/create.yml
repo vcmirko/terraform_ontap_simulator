@@ -1,0 +1,214 @@
+---
+# set auth dict, to be reused everywhere
+- set_fact:
+    auth: &auth
+      hostname: "{{ netapp_hostname }}"
+      username: "{{ netapp_username }}"
+      password: "{{ netapp_password }}"
+      https: true
+      validate_certs: false
+
+# we sleep for a few seconds, to make sure the node was properly initiated
+- name: "Sleep a while"
+  ansible.builtin.wait_for:
+    timeout: 10
+
+# we create a new cluster
+- name: create cluster
+  na_ontap_cluster:
+    state: present
+    cluster_name: "{{ cluster.name }}"
+    <<: *auth
+  retries: 2
+
+# we set the timezone and location
+- name: set timezone and location
+  ignore_errors: true
+  na_ontap_command:
+    command: "{{ item }}"
+    privilege: advanced
+    use_rest: Never
+    <<: *auth
+  loop_control:
+    label: 'Executing : {{ item | join(" ")}}'
+  loop:
+    - ["cluster", "date", "modify", "-timezone", "{{ timezone }}"]
+    - ["system", "node", "modify", "-node", "*", "-location", "{{ location }}"]
+
+# unlock the diag user
+- name: Unlock User diag
+  na_ontap_user:
+    state: present
+    name: diag
+    applications: console
+    authentication_method: password
+    lock_user: false
+    role_name: admin
+    vserver: "{{ cluster.name }}"
+    <<: *auth
+  ignore_errors: true
+
+# loop the licenses
+- name: Add licenses
+  na_ontap_license:
+    state: present
+    license_codes: "{{ cluster.license_codes }}"
+    <<: *auth
+
+# we assign 20 disks
+- name: Assign disks
+  na_ontap_disks:
+    node: "{{ nodes[0].name }}"
+    disk_count: 20
+    min_spares: 0
+    disk_type: FCAL
+    <<: *auth
+
+# - name: Resize root aggregate
+#   na_ontap_aggregate:
+#     state: present
+#     nodes:
+#       - "{{ nodes[0].name }}"
+#     name: "aggr0_{{ nodes[0].name | replace('-','_') }}"
+#     disk_count: 6
+#     raid_size: 6
+#     raid_type: raid_dp
+#     <<: *auth
+
+# - name: Resize vol0
+#   na_ontap_volume:
+#     state: present
+#     name: vol0
+#     vserver: "{{ nodes[0].name }}"
+#     aggregate_name: "aggr0_{{ nodes[0].name | replace('-','_') }}"
+#     size: 13
+#     size_unit: gb
+#     percent_snapshot_space: 0
+#     space_guarantee: none
+#     <<: *auth
+
+# - name: Resize vol0 with cli
+#   netapp.ontap.na_ontap_command:
+#     command: ['vol', 'size', '-volume','vol0', '-vserver','{{nodes[0].name}}','-new-size','13g']
+#     <<: *auth
+
+# - name: Rename root aggregate
+#   na_ontap_aggregate:
+#     state: present
+#     from_name: "aggr0_{{ nodes[0].name | replace('-','_') }}"
+#     name: "n01_root"
+#     <<: *auth
+
+# - name: Disable snapshot schedule
+#   na_ontap_snapshot_policy:
+#     state: absent
+#     name: default
+#     schedule: [hourly]
+#     count: 1
+#     enabled: false
+#     vserver: "{{ cluster.name }}"
+#     <<: *auth
+
+# we create a first aggregate of 6 disks
+- name: create aggr1
+  na_ontap_aggregate:
+    state: present
+    name: aggr1
+    raid_type: raid_dp
+    disk_count: 6
+    raid_size: 6
+    nodes: "{{ nodes[0].name }}"
+    wait_for_online: true
+    time_out: 18000
+    service_state: online
+    <<: *auth
+
+# set dns
+- name: create DNS on cluster
+  na_ontap_dns:
+    state: present
+    vserver:  "{{ cluster.name }}"
+    domains: "{{ dns.domains }}"
+    nameservers: "{{ dns.servers}}"
+    <<: *auth
+
+# sometime a bad broadcast domain is made, we remove it
+- name: remove vlan port from broadcast domain
+  netapp.ontap.na_ontap_broadcast_domain:
+    state: absent
+    name: Default-1
+    mtu: 1500
+    ipspace: Default
+    ports: ['{{ nodes[0].name }}:e0d']
+    <<: *auth
+
+# we create a broadcast domain for every vlan we want
+- name: create Broadcast domains
+  netapp.ontap.na_ontap_broadcast_domain:
+    state: present
+    name: "vlan-{{ item }}"
+    mtu: 1500
+    ipspace: Default
+    <<: *auth
+  loop_control:
+    label: 'Creating vlan {{ item }}'
+  loop: "{{ cluster.vlans }}"
+
+# we create the vlan's
+- name: create VLANs
+  netapp.ontap.na_ontap_net_vlan:
+    state: present
+    vlanid: "{{ item }}"
+    parent_interface: "{{cluster.vlan_port}}"
+    node: "{{ nodes[0].name }}"
+    broadcast_domain: "vlan-{{ item }}"
+    ipspace: "Default"
+    <<: *auth
+  loop_control:
+    label: 'Creating vlan {{ item }}'
+  loop: "{{ cluster.vlans }}"
+
+# we add the vlan's to the broadcast domains
+- name: add vlans to broadcast domain
+  netapp.ontap.na_ontap_broadcast_domain:
+    state: present
+    name: "vlan-{{ item }}"
+    mtu: 1500
+    ipspace: Default
+    ports: ["{{nodes[0].name}}:{{cluster.vlan_port}}-{{item}}"]
+    <<: *auth
+  loop_control:
+    label: 'Creating broadcast domain vlan-{{ item }}'
+  loop: "{{ cluster.vlans }}"
+
+# we create the cluster mgmt lif
+- name: Create cluster mgmt lif
+  na_ontap_interface:
+    state: present
+    interface_name: "cluster_mgmt"
+    vserver: "{{ cluster.name }}"
+    address: "{{ cluster.mgmt_ip }}"
+    netmask: "{{ cluster.netmask }}"
+    service_policy: default-management
+    ipspace: default
+    admin_status: up
+    use_rest: never
+    home_node: "{{ nodes[0].name }}"
+    home_port: "{{ cluster.mgmt_port }}"
+    <<: *auth
+
+# and we create the cluster mgmt lif
+- name: Create inter cluster lif
+  na_ontap_interface:
+    state: present
+    interface_name: "ic"
+    vserver: "{{ cluster.name }}"
+    address: "{{ cluster.ic_ip }}"
+    netmask: "{{ cluster.netmask }}"
+    service_policy: default-intercluster
+    ipspace: default
+    admin_status: up
+    use_rest: never
+    home_node: "{{ nodes[0].name }}"
+    home_port: "{{ cluster.ic_port }}"
+    <<: *auth

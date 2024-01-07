@@ -1,0 +1,26 @@
+- name: scenario
+  set_fact:
+    scenario:
+      - name: Logging in
+        string: admin
+        sleep: 300
+      - name: Creating node mgtm lif
+        string: "net int create -vserver Default -lif {{ cluster_name }}-01_mgmt -home-node localhost -home-port {{ node_port }} -address {{ node_ip }} -netmask {{ node_netmask }} -role node_mgmt"
+      - name: Removing auto lif
+        string: net int delete -vserver Default -lif mgmt_auto
+      - name: Changing password for admin
+        string : security login password -username admin
+      - name: Emtpy password
+        string : ""
+      - name: New password
+        string : "{{ ontap_password }}"
+      - name: Repeat password
+        string : "{{ ontap_password }}"
+      - name: Enable SSH
+        string: security login create -user-or-group-name admin -application ssh -authentication-method password
+
+- name: Create simulator - make plan
+  include_tasks: keysend.yml
+  loop: "{{ scenario }}"
+  loop_control:
+    label: "{{ item.name }}"

@@ -1,0 +1,49 @@
+timezone: Europe/Brussels
+location: Mylocation
+
+vars_default:
+  vmware:
+    data_center       : "dc"
+    cluster           : "cluster"
+    workload_datastore: "ds_syn"
+    compute_pool      : "maul.slash.local"
+    compute_host      : "maul.slash.local"
+    vm_network        : "e0c"
+    cluster_network   : "e0d-19"
+    vlan_network      : "ALL"    
+  simulator:
+    ova: vsim-netapp-DOT9.11.1-cm_nodar.ova
+  terraform:
+    path: /app/dist/persistent/terraform
+  dns:
+    domains: slash.local
+    servers: 172.16.0.32
+  cluster:
+    name     : "bb8" # we assume you will override this with vars_external.cluster.name
+    mgmt_ip  : "172.16.56.1" # we assume you will override this with vars_external.cluster.mgmt_ip
+    port     : 443
+    protocol : https
+    mgmt_port: e0c
+    ic_port  : e0d-19
+    netmask  : "255.255.0.0"
+    gateway  : "172.16.0.1"
+    vlans:
+      - 16
+      - 17
+      - 18
+      - 19
+    vlan_port: e0d  # we assume we will be creating vlans on this port and we use vlan 4095 on vmware to pass all vlans
+    license_codes:
+    - YVUCRRRRYVHXCFABGAAAAAAAAAAA
+    - WKQGSRRRYVHXCFABGAAAAAAAAAAA
+    - SOHOURRRYVHXCFABGAAAAAAAAAAA
+    - YBSOYRRRYVHXCFABGAAAAAAAAAAA
+    - KQSRRRRRYVHXCFABGAAAAAAAAAAA
+    - MBXNQRRRYVHXCFABGAAAAAAAAAAA
+    - QDDSVRRRYVHXCFABGAAAAAAAAAAA
+    - CYAHWRRRYVHXCFABGAAAAAAAAAAA
+    - GUJZTRRRYVHXCFABGAAAAAAAAAAA
+    - OSYVWRRRYVHXCFABGAAAAAAAAAAA
+    - UZLKTRRRYVHXCFABGAAAAAAAAAAA
+    - EJFDVRRRYVHXCFABGAAAAAAAAAAA
+

@@ -1,0 +1,11 @@
+---
+- name: "Day 0 Operations - Register simulator"
+  hosts: "localhost"
+  become: false
+  gather_facts: false
+  vars_files:
+    - "vars/defaults.yml"
+  roles:
+    - { role: facts, qtask: credentials }  
+    - { role: aiqum, qtask: facts }        
+    - { role: aiqum, qtask: register }         

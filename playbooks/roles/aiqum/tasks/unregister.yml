@@ -1,0 +1,33 @@
+---
+
+- set_fact:
+    auth: &auth
+      user: "{{ aiq_username }}"
+      password: "{{ aiq_password }}"
+      force_basic_auth: yes
+      validate_certs: no
+      return_content: yes
+      body_format: json      
+
+- name: Get CLUSTER in Aiqum
+  # no_log: true
+  uri:
+    url: "https://{{ aiq_hostname }}/api/datacenter/cluster/clusters?name={{ cluster_name }}"
+    method: GET
+    status_code: 200,201
+    <<: *auth
+  delegate_to: localhost
+  ignore_errors: yes
+  register: cluster_obj
+
+- name: Delete CLUSTER in Aiqum
+  # no_log: true
+  uri:
+    url: "https://{{ aiq_hostname }}/api/admin/datasources/clusters/{{ cluster_obj.json.records[0].key }}"
+    method: DELETE
+    status_code: 200,201
+    <<: *auth
+  delegate_to: localhost
+  ignore_errors: yes
+  when: cluster_obj.json.records | length > 0
+

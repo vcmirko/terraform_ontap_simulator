@@ -1,0 +1,23 @@
+- name: "{{ item.name }} - sleep"
+  ansible.builtin.wait_for:
+    timeout: "{{ item.sleep | default(0) }}"
+
+- name: "{{ item.name }} - send"
+  vmware_guest_sendkey:
+    username:       '{{ vcenter_username }}'
+    password:       '{{ vcenter_password }}'
+    hostname:       '{{ vcenter_hostname }}'
+    name:           "{{ cluster_name }}"
+    validate_certs: no
+    keys_send:      "{{ item.key | default(omit) }}"
+    string_send:    "{{ item.string | default(omit) }}"
+
+- name: "{{ item.name }} - enter"
+  vmware_guest_sendkey:
+    username:       '{{ vcenter_username }}'
+    password:       '{{ vcenter_password }}'
+    hostname:       '{{ vcenter_hostname }}'
+    name:           "{{ cluster_name }}"
+    validate_certs: no
+    keys_send:      "ENTER"
+  when: (item.key is not defined)

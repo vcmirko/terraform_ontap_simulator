@@ -1,0 +1,21 @@
+- name: Create simulator - make plan
+  terraform:
+    project_path: "{{ plan_dir }}"
+    state: planned
+    variables:
+      vsphere_user      : '{{ vcenter_username }}'
+      vsphere_password  : '{{ vcenter_password }}'
+      vsphere_server    : '{{ vcenter_hostname }}'
+      data_center       : "{{ vmware.data_center }}"
+      cluster           : "{{ vmware.cluster }}"
+      workload_datastore: "{{ vmware.datastore }}"
+      compute_pool      : "{{ vmware.compute_pool }}"
+      compute_host      : "{{ vmware.compute_host }}"
+      vm_network        : "{{ vmware.mgmt_network }}"
+      vm_name           : "{{ vm_name }}"
+      cluster_network   : "{{ vmware.cluster_name }}"
+      vlan_network      : "{{ vmware.vlan_network }}"
+      local_ovf_path    : "{{ ovf_path }} "
+    plan_file : "{{ vm_name }}.tfplan"
+    workspace : "{{ vm_name}}"
+    force_init: true

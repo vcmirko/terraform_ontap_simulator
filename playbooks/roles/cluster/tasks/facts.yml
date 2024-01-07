@@ -1,0 +1,20 @@
+---
+## This is a little merging of dicts of variables to allow defaults to merge with passed parameters
+## We accomplish this by merging 2 objects
+## - vars_default (a file default loaded, holding dict vars_default, holding your default values)
+## - vars_external (a dict being passed for custom values)
+## they are used to merge together and form a final variable source
+
+- name: Merge Extravars
+  ansible.builtin.set_fact:
+    dns    : "{{ (vars_default.dns | default({})) | combine(vars_external.dns | default({}) ,  recursive=True) }}"
+    cluster: "{{ (vars_default.cluster | default({})) | combine(vars_external.cluster | default({}) ,  recursive=True) }}"
+    nodes  : "{{ (vars_default.nodes | default([])) + (vars_external.nodes  | default([])) }}"
+
+- name: Set ontap credentials
+  ansible.builtin.set_fact:
+    netapp_hostname:  "{{ nodes[0].mgmt_ip }}" # we will connect with the first node, as there is no cluster yet
+    netapp_username:  "{{ ontap_username }}"
+    netapp_password:  "{{ ontap_password }}"
+  delegate_to: localhost
+  

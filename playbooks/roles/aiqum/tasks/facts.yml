@@ -1,0 +1,28 @@
+---
+## This is a little merging of dicts of variables to allow defaults to merge with passed parameters
+## We accomplish this by merging 2 objects
+## - vars_default (a file default loaded, holding dict vars_default, holding your default values)
+## - vars_external (a dict being passed for custom values)
+## they are used to merge together and form a final variable source
+
+- name: Merge Extravars
+  ansible.builtin.set_fact:
+    cluster: "{{ (vars_default.cluster | default({})) | combine(vars_external.cluster | default({}) ,  recursive=True) }}"
+
+- name: Set naming facts
+  ansible.builtin.set_fact:
+    # ansible_python_interpreter:   /usr/bin/python3
+    cluster_name:                   "{{ cluster.name     | default('') }}"
+    cluster_ip:                     "{{ cluster.mgmt_ip  | default('') }}"
+    cluster_port:                   "{{ cluster.port     | default('443')}}"
+    cluster_protocol:               "{{ cluster.protocol | default('https') }}"
+
+    aiq_hostname:                   "{{ aiqum_hostname  | default('') }}"
+    aiq_username:                   "{{ aiqum_username  | default('') }}"
+    aiq_password:                   "{{ aiqum_password  | default('') }}"
+
+    netapp_username:                "{{ ontap_username | default('') }}"
+    netapp_password:                "{{ ontap_password | default('') }}"    
+
+
+  

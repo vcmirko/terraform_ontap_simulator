@@ -1,0 +1,16 @@
+---
+- name: "Day 0 Operations - Deploy Simulator"
+  hosts: "localhost"
+  become: false
+  gather_facts: false
+  collections:
+    - community.general.terraform
+  vars_files:
+    - "vars/defaults.yml"
+
+  roles:
+    - { role: facts, qtask: credentials }  
+    - { role: cluster, qtask: facts }       
+    - { role: cluster, qtask: create }     
+    - { role: aiqum, qtask: facts }        
+    - { role: aiqum, qtask: register }         

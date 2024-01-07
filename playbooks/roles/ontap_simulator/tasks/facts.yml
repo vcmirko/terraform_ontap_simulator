@@ -1,0 +1,28 @@
+---
+## This is a little merging of dicts of variables to allow defaults to merge with passed parameters
+## We accomplish this by merging 2 objects
+## - vars_default (a file default loaded, holding dict vars_default, holding your default values)
+## - vars_external (a dict being passed for custom values)
+## they are used to merge together and form a final variable source
+
+- name: Merge Extravars
+  ansible.builtin.set_fact:
+    dns      : "{{ (vars_default.dns | default({})) | combine(vars_external.dns | default({}) ,  recursive=True) }}"
+    cluster  : "{{ (vars_default.cluster | default({})) | combine(vars_external.cluster | default({}) ,  recursive=True) }}"
+    nodes    : "{{ (vars_default.nodes | default([])) + (vars_external.nodes  | default([])) }}"
+    terraform: "{{ (vars_default.terraform | default({})) | combine(vars_external.terraform | default({}) ,  recursive=True) }}"
+    vmware   : "{{ (vars_default.vmware | default({})) | combine(vars_external.vmware | default({}) ,  recursive=True) }}"
+    simulator : "{{ (vars_default.simulator | default({})) | combine(vars_external.simulator | default({}) ,  recursive=True) }}"
+
+## Here we flatten all the variables
+- name: Set extravars
+  ansible.builtin.set_fact:
+    terraform_path: "{{ terraform.path }}"
+    cluster_name  : "{{ cluster.name }}"
+    plan_dir      : "{{ terraform.path }}/plans/ontap_simulator"
+    ovf_path      : "{{ terraform.path }}/ova/netapp/{{ simulator.ova }}"
+    node_ip       : "{{ nodes[0].mgmt_ip }}"  # we grab the mgmt ip of the first node
+    node_port     : "{{ cluster.mgmt_port }}" # we assume all we use the same cluster mgmt and node mgmt port
+    node_netmask  : "{{ cluster.netmask }}"   # we assume the cluster mgmt netmask and node mgmt netmask is the same
+    vm_name       : "{{ cluster.name }}"      # we assume the vm will be the cluster name
+

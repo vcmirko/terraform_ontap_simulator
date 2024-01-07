@@ -1,0 +1,43 @@
+---
+
+- set_fact:
+    auth: &auth
+      user: "{{ aiq_username }}"
+      password: "{{ aiq_password }}"
+      force_basic_auth: yes
+      validate_certs: no
+      return_content: yes
+      body_format: json      
+
+- name: Get CLUSTER in Aiqum
+  no_log: true
+  uri:
+    url: "https://{{ aiq_hostname }}/api/datacenter/cluster/clusters?name={{ cluster_name }}"
+    method: GET
+    status_code: 200,201
+    <<: *auth
+  delegate_to: localhost
+  # ignore_errors: yes
+  register: cluster_obj
+
+- name: Rediscover Aiqum for CLUSTER
+  uri:
+    url: https://{{ aiq_hostname }}/api/management-server/admin/datasources/{{ cluster_obj.json.records[0].key }}/discover
+    method: POST
+    <<: *auth
+  delegate_to: localhost
+  register: rediscover_operation
+  when: cluster_obj.json.records | length > 0
+
+- name: Wait for operation
+  uri:
+    url: https://{{ aiq_hostname }}/api/management-server/jobs/{{ rediscover_operation.json.operationId }}
+    method: GET
+    <<: *auth
+  delegate_to: localhost
+  register: rediscover_status
+  ignore_errors: yes
+  delay: 10
+  retries: 10
+  until: rediscover_status.json.state == "completed"
+  when: rediscover_operation.json.operationId is defined
