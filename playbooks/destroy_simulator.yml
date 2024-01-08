@@ -12,5 +12,5 @@
     - { role: facts, qtask: credentials }  
     - { role: aiqum, qtask: facts }
     - { role: aiqum, qtask: unregister }    
-    - { role: simulator, qtask: facts }
-    - { role: simulator, qtask: destroy }
+    - { role: ontap_simulator, qtask: facts }
+    - { role: ontap_simulator, qtask: destroy }

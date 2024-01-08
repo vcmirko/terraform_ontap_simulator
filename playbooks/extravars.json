@@ -1,0 +1,24 @@
+{
+  "vcenter": {
+    "user": "administrator@vsphere.local",
+    "password": "N*****",
+    "host": "jabba.slash.local"
+  },
+  "ontap": {
+    "user": "admin",
+    "password": "N*****"
+  },
+  "aiqum": {
+    "user": "admin",
+    "password": "N****",
+    "host": "172.16.0.88"
+  },
+  "external_vars":{
+    "terraform": {
+      "path": "/srv/apps/terraform_ontap_simulator/terraform"
+    },
+    "vmware": {
+      "vm_name": "bb8"
+    }
+  }
+}

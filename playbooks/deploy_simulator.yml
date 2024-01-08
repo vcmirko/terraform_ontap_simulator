@@ -10,10 +10,10 @@
 
   roles:
     - { role: facts, qtask: credentials }  
-    - { role: simulator, qtask: facts }
-    - { role: simulator, qtask: plan }    
-    - { role: simulator, qtask: create }
-    - { role: simulator, qtask: init }    
+    - { role: ontap_simulator, qtask: facts }
+    - { role: ontap_simulator, qtask: plan }    
+    - { role: ontap_simulator, qtask: create }
+    - { role: ontap_simulator, qtask: init }    
     - { role: cluster, qtask: facts }       
     - { role: cluster, qtask: create }     
     - { role: aiqum, qtask: facts }        
