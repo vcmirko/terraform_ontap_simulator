@@ -73,6 +73,20 @@ Example :
     - { role: aiqum, qtask: register }         
 ```
 
+#### Prerequisites
+
+- Ansible core
+- ansible-galaxy netapp
+- Netapp Python library
+- Deepdiff
+
+```
+  pip3 install deepdiff ansible ansible-core 
+  ansible-galaxy collection install netapp.ontap -f
+  ansible-galaxy collection install community.general -f
+  ansible-galaxy collection install community.vmware -f
+```
+
 #### Role 'facts'
 
 We have a role facts, that we can call as global starter role, to gather global information.  

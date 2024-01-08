@@ -203,7 +203,7 @@
     state: present
     interface_name: "ic"
     vserver: "{{ cluster.name }}"
-    address: "{{ cluster.ic_ip }}"
+    address: "{{ nodes[0].ic_ip }}"
     netmask: "{{ cluster.netmask }}"
     service_policy: default-intercluster
     ipspace: default
