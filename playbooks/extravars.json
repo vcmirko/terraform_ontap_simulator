@@ -1,7 +1,7 @@
 {
   "vcenter": {
     "user": "administrator@vsphere.local",
-    "password": "N*****",
+    "password": "N*****!",
     "host": "jabba.slash.local"
   },
   "ontap": {
@@ -10,15 +10,19 @@
   },
   "aiqum": {
     "user": "admin",
-    "password": "N****",
+    "password": "N*****",
     "host": "172.16.0.88"
   },
-  "external_vars":{
+  "vars_external":{
     "terraform": {
       "path": "/srv/apps/terraform_ontap_simulator/terraform"
     },
-    "vmware": {
-      "vm_name": "bb8"
-    }
+    "cluster": {
+      "name": "bb8",
+      "mgmt_ip": "172.16.56.1"
+    },
+    "nodes": [{
+      "mgmt_ip": "172.16.56.2"
+    }]
   }
 }

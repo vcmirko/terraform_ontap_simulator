@@ -1,21 +1,21 @@
 - name: Create simulator - make plan
-  terraform:
+  community.general.terraform:
     project_path: "{{ plan_dir }}"
     state: planned
     variables:
-      vsphere_user      : '{{ vcenter_username }}'
-      vsphere_password  : '{{ vcenter_password }}'
-      vsphere_server    : '{{ vcenter_hostname }}'
-      data_center       : "{{ vmware.data_center }}"
-      cluster           : "{{ vmware.cluster }}"
-      workload_datastore: "{{ vmware.datastore }}"
-      compute_pool      : "{{ vmware.compute_pool }}"
-      compute_host      : "{{ vmware.compute_host }}"
-      vm_network        : "{{ vmware.mgmt_network }}"
-      vm_name           : "{{ vm_name }}"
-      cluster_network   : "{{ vmware.cluster_name }}"
-      vlan_network      : "{{ vmware.vlan_network }}"
-      local_ovf_path    : "{{ ovf_path }} "
-    plan_file : "{{ vm_name }}.tfplan"
-    workspace : "{{ vm_name}}"
+      vsphere_user      : "{{ vcenter_username }}"
+      vsphere_password  : "{{ vcenter_password }}"
+      vsphere_server    : "{{ vcenter_hostname }}"
+      data_center       : "{{ vmware_data_center }}"
+      cluster           : "{{ vmware_cluster }}"
+      workload_datastore: "{{ vmware_datastore }}"
+      compute_pool      : "{{ vmware_compute_pool }}"
+      compute_host      : "{{ vmware_compute_host }}"
+      vm_network        : "{{ vmware_vm_network }}"
+      cluster_network   : "{{ vmware_cluster_network }}"
+      vlan_network      : "{{ vmware_vlan_network }}"
+      local_ovf_path    : "{{ ovf_path }}"
+      vm_name           : "{{ vmware_vm_name }}"
+    plan_file : "{{ vmware_vm_name }}.tfplan"
+    workspace : "{{ vmware_vm_name}}"
     force_init: true

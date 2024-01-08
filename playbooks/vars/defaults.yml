@@ -5,11 +5,11 @@ vars_default:
   vmware:
     data_center       : "dc"
     cluster           : "cluster"
-    workload_datastore: "ds_syn"
+    datastore         : "ds_syn"
     compute_pool      : "maul.slash.local"
     compute_host      : "maul.slash.local"
-    vm_network        : "e0c"
-    cluster_network   : "e0d-19"
+    vm_network        : "VLAN16"
+    cluster_network   : "VLAN19"
     vlan_network      : "ALL"    
   simulator:
     ova: vsim-netapp-DOT9.11.1-cm_nodar.ova
