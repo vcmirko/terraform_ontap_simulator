@@ -12,19 +12,28 @@ So obviously we need some vcenter information, path to the ova file, vm_name, so
 
 #### Prerequisites
 
-- Terraform needs to be installed (duh...)  
+- Terraformneeds to be installed (`apt-get / yum`)  
+- 2 python libraries pyVim and PyVmomi (`pip3 install`)
 - The plan folder needs r/w access (`chmod -R 644`)
 - The terraform needs to be initiated (`terraform init`), to install the providers.  
-- The `.terraform` folder needs to have execution rights (`chmod +x -R`), after the init, the `.terraform` folder will be created.
+- The `.terraform` folder needs to have execution rights (`chmod -R 755`), after the init, the `.terraform` folder will be created.
 
 ```
-  cd plans/ontap_simulator
+  apt-get update && sudo apt-get install -y gnupg software-properties-common curl
+  curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+  sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+  sudo apt-get update && sudo apt-get install terraform
+  
+  pip3 install pyVim PyVmomi
+
+  git clone https://github.com/vcmirko/terraform_ontap_simulator
+  cd terraform_ontap_simulator/plans/ontap_simulator
   terraform init
   chmod -R 644 .
-  chmod +x -R .terraform
+  chmod -R 755 .terraform
 ```
   
-In the folder terraform/ova/netapp we assume you place the vsim ova file, which is not included in this repository
+In the folder terraform/ova/netapp we assume you place the vsim ova file, which is not included in this repository, you must download this from Netapp Downloads Page
 
 ### Ansible
 

@@ -25,11 +25,11 @@
     node_port     : "{{ cluster.mgmt_port }}" # we assume all we use the same cluster mgmt and node mgmt port
     node_netmask  : "{{ cluster.netmask }}"   # we assume the cluster mgmt netmask and node mgmt netmask is the same
     vmware_vm_name           : "{{ cluster.name }}"      # we assume the vm will be the cluster name
-    vmware_data_center       : "{{ vmware.data_center }}"
-    vmware_cluster           : "{{ vmware.cluster }}"
-    vmware_datastore         : "{{ vmware.datastore }}"
-    vmware_compute_pool      : "{{ vmware.compute_pool }}"
-    vmware_compute_host      : "{{ vmware.compute_host }}"
-    vmware_vm_network        : "{{ vmware.vm_network }}"
-    vmware_cluster_network   : "{{ vmware.cluster_network }}"
-    vmware_vlan_network      : "{{ vmware.vlan_network }}"
+    vmware_data_center       : "{{ vmware.data_center     | default('') }}"
+    vmware_cluster           : "{{ vmware.cluster         | default('') }}"
+    vmware_datastore         : "{{ vmware.datastore       | default('')}}"
+    vmware_compute_pool      : "{{ vmware.compute_pool    | default('')}}"
+    vmware_compute_host      : "{{ vmware.compute_host    | default('') }}"
+    vmware_vm_network        : "{{ vmware.vm_network      | default('') }}"
+    vmware_cluster_network   : "{{ vmware.cluster_network | default('') }}"
+    vmware_vlan_network      : "{{ vmware.vlan_network    | default('') }}"
