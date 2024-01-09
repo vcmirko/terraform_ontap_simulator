@@ -8,11 +8,6 @@
       https: true
       validate_certs: false
 
-# we sleep for a few seconds, to make sure the node was properly initiated
-- name: "Sleep a while"
-  ansible.builtin.wait_for:
-    timeout: 10
-
 # we create a new cluster
 - name: create cluster
   netapp.ontap.na_ontap_cluster:
@@ -20,7 +15,8 @@
     use_rest: always
     cluster_name: "{{ cluster.name }}"
     <<: *auth
-  retries: 2
+  retries: 3
+  delay: 60
 
 # we set the timezone
 - name: set timezone
