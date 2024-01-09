@@ -27,13 +27,17 @@ So obviously we need some vcenter information, path to the ova file, vm_name, so
   pip3 install pyVim PyVmomi
 
   git clone https://github.com/vcmirko/terraform_ontap_simulator
-  cd terraform_ontap_simulator/plans/ontap_simulator
+  cd terraform_ontap_simulator/terraform/plans/ontap_simulator
   terraform init
   chmod -R 644 .
   chmod -R 755 .terraform
 ```
   
 In the folder terraform/ova/netapp we assume you place the vsim ova file, which is not included in this repository, you must download this from Netapp Downloads Page
+```
+  #example copy command : 
+  cp vsim-netapp-DOT9.11.1-cm_nodar.ova ./terraform_ontap_simulator/terraform/ova/netapp/
+```
 
 ### Ansible
 
@@ -105,3 +109,10 @@ This will create the cluster and apply some day0 tasks (dns, licenses, timezone,
 
 As an extra, the aiqum role allows to (un)register and rediscover the cluster in Netapps 'AIQUM' server (Active IQ Unified Manager).
 
+#### Test run
+
+There is sample extravars.json file.  
+Change it accordingly.  
+```
+  ansible-playbook -e @extravars.json deploy_simulator.yml
+```

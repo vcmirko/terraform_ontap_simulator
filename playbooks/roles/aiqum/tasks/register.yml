@@ -9,6 +9,17 @@
       return_content: yes
       body_format: json      
 
+- name: Get CLUSTER in Aiqum
+  # no_log: true
+  uri:
+    url: "https://{{ aiq_hostname }}/api/datacenter/cluster/clusters?name={{ cluster_name }}"
+    method: GET
+    status_code: 200,201
+    <<: *auth
+  delegate_to: localhost
+  ignore_errors: yes
+  register: cluster_obj
+
 - name: Register CLUSTER in Aiqum
 #  no_log: true
   uri:
@@ -23,4 +34,5 @@
     status_code: 200,201
     <<: *auth
   delegate_to: localhost
-  # ignore_errors: yes
+  ignore_errors: yes
+  when: cluster_obj.json.records | length == 0

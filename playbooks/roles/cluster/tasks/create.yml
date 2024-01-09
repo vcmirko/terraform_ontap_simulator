@@ -15,29 +15,45 @@
 
 # we create a new cluster
 - name: create cluster
-  na_ontap_cluster:
+  netapp.ontap.na_ontap_cluster:
     state: present
+    use_rest: always
     cluster_name: "{{ cluster.name }}"
     <<: *auth
   retries: 2
 
-# we set the timezone and location
-- name: set timezone and location
-  ignore_errors: true
-  na_ontap_command:
-    command: "{{ item }}"
-    privilege: advanced
-    use_rest: Never
+# we set the timezone
+- name: set timezone
+  netapp.ontap.na_ontap_rest_cli:
+    verb: PATCH
+    command: "cluster/date"
+    body:
+      timezone: "{{ timezone }}"
     <<: *auth
+
+# we set the location on all nodes
+- name: get nodes
+  netapp.ontap.na_ontap_rest_info:
+    <<: *auth
+    gather_subset:
+      - cluster/nodes
+    fields:
+      - name
+  register: nodes_result
+
+- name: set location
+  netapp.ontap.na_ontap_node:
+    <<: *auth
+    location: "{{ location }}"
+    name: "{{ item }}"
+    use_rest: always
   loop_control:
-    label: 'Executing : {{ item | join(" ")}}'
-  loop:
-    - ["cluster", "date", "modify", "-timezone", "{{ timezone }}"]
-    - ["system", "node", "modify", "-node", "*", "-location", "{{ location }}"]
+    label: 'Setting location {{ item }} -> {{ location }}'    
+  loop: "{{ nodes_result.ontap_info['cluster/nodes'].records | map(attribute='name') | list }}"
 
 # unlock the diag user
 - name: Unlock User diag
-  na_ontap_user:
+  netapp.ontap.na_ontap_user:
     state: present
     name: diag
     applications: console
@@ -45,23 +61,26 @@
     lock_user: false
     role_name: admin
     vserver: "{{ cluster.name }}"
+    use_rest: always
     <<: *auth
   ignore_errors: true
 
 # loop the licenses
 - name: Add licenses
-  na_ontap_license:
+  netapp.ontap.na_ontap_license:
     state: present
     license_codes: "{{ cluster.license_codes }}"
+    use_rest: always
     <<: *auth
 
 # we assign 20 disks
 - name: Assign disks
-  na_ontap_disks:
+  netapp.ontap.na_ontap_disks:
     node: "{{ nodes[0].name }}"
     disk_count: 20
     min_spares: 0
     disk_type: FCAL
+    use_rest: always
     <<: *auth
 
 # - name: Resize root aggregate
@@ -111,7 +130,7 @@
 
 # we create a first aggregate of 6 disks
 - name: create aggr1
-  na_ontap_aggregate:
+  netapp.ontap.na_ontap_aggregate:
     state: present
     name: aggr1
     raid_type: raid_dp
@@ -121,15 +140,17 @@
     wait_for_online: true
     time_out: 18000
     service_state: online
+    use_rest: always
     <<: *auth
 
 # set dns
 - name: create DNS on cluster
-  na_ontap_dns:
+  netapp.ontap.na_ontap_dns:
     state: present
     vserver:  "{{ cluster.name }}"
     domains: "{{ dns.domains }}"
     nameservers: "{{ dns.servers}}"
+    use_rest: always
     <<: *auth
 
 # sometime a bad broadcast domain is made, we remove it
@@ -139,6 +160,7 @@
     name: Default-1
     mtu: 1500
     ipspace: Default
+    use_rest: always
     ports: ['{{ nodes[0].name }}:e0d']
     <<: *auth
 
@@ -149,6 +171,7 @@
     name: "vlan-{{ item }}"
     mtu: 1500
     ipspace: Default
+    use_rest: always
     <<: *auth
   loop_control:
     label: 'Creating vlan {{ item }}'
@@ -163,6 +186,7 @@
     node: "{{ nodes[0].name }}"
     broadcast_domain: "vlan-{{ item }}"
     ipspace: "Default"
+    use_rest: always
     <<: *auth
   loop_control:
     label: 'Creating vlan {{ item }}'
@@ -186,13 +210,12 @@
   na_ontap_interface:
     state: present
     interface_name: "cluster_mgmt"
-    vserver: "{{ cluster.name }}"
     address: "{{ cluster.mgmt_ip }}"
     netmask: "{{ cluster.netmask }}"
     service_policy: default-management
-    ipspace: default
+    ipspace: Default
     admin_status: up
-    use_rest: never
+    use_rest: always
     home_node: "{{ nodes[0].name }}"
     home_port: "{{ cluster.mgmt_port }}"
     <<: *auth
@@ -202,13 +225,12 @@
   na_ontap_interface:
     state: present
     interface_name: "ic"
-    vserver: "{{ cluster.name }}"
     address: "{{ nodes[0].ic_ip }}"
     netmask: "{{ cluster.netmask }}"
     service_policy: default-intercluster
-    ipspace: default
+    ipspace: Default
     admin_status: up
-    use_rest: never
+    use_rest: always
     home_node: "{{ nodes[0].name }}"
     home_port: "{{ cluster.ic_port }}"
     <<: *auth
